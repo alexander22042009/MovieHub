@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MovieHub.Data.Entities.Enums
+﻿namespace MovieHub.Data.Entities.Enums
 {
     public enum UserRole
     {
+        Guest = 0,
         RegisteredUser = 1,
         Administrator = 2
     }
 }
-

@@ -14,6 +14,55 @@ namespace MovieHub.App.Services
             _db = db;
         }
 
+        public async Task<(bool ok, string message)> DeleteMovieAsAdminAsync(int movieId)
+        {
+            if (movieId <= 0) return (false, "Invalid movie id.");
+
+            var movie = await _db.Movies.FirstOrDefaultAsync(m => m.Id == movieId);
+            if (movie == null) return (false, "Movie not found.");
+
+            _db.Movies.Remove(movie);
+            await _db.SaveChangesAsync();
+
+            return (true, $"Movie '{movie.Title}' deleted.");
+        }
+
+        public async Task<(bool ok, string message)> DeleteMovieAsUserAsync(int movieId, int currentUserId)
+        {
+            if (movieId <= 0) return (false, "Invalid movie id.");
+
+            var movie = await _db.Movies.FirstOrDefaultAsync(m => m.Id == movieId);
+            if (movie == null) return (false, "Movie not found.");
+
+            if (movie.AddedByUserId != currentUserId)
+                return (false, "You can delete only movies added by you.");
+
+            _db.Movies.Remove(movie);
+            await _db.SaveChangesAsync();
+
+            return (true, $"Movie '{movie.Title}' deleted.");
+        }
+
+        public async Task<(bool ok, string message)> EditMovieAsAdminAsync(EditMovieDto dto)
+        {
+            if (dto.MovieId <= 0) return (false, "Invalid movie id.");
+
+            var movie = await _db.Movies.FirstOrDefaultAsync(m => m.Id == dto.MovieId);
+            if (movie == null) return (false, "Movie not found.");
+
+            // (без валидации засега — ще я правим в стъпка 1 по твоя ред)
+            var genreExists = await _db.Genres.AnyAsync(g => g.Id == dto.GenreId);
+            if (!genreExists) return (false, "Invalid genre.");
+
+            movie.Title = dto.Title.Trim();
+            movie.ReleaseYear = dto.Year;
+            movie.Rating = dto.Rating;
+            movie.GenreId = dto.GenreId;
+
+            await _db.SaveChangesAsync();
+            return (true, $"Movie '{movie.Title}' updated.");
+        }
+
         public async Task<List<MovieListItemDto>> GetAllMoviesAsync()
         {
             return await _db.Movies

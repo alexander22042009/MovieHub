@@ -1,11 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MovieHub.App.DTOs.Users;
 using MovieHub.Data.Data;
-using MovieHub.Data.Models;
 using MovieHub.Data.Entities;
 using MovieHub.Data.Entities.Enums;
-using System.Security.Cryptography;
-using System.Text;
+using MovieHub.Data.Models;
 
 namespace MovieHub.App.Services
 {
@@ -20,23 +18,26 @@ namespace MovieHub.App.Services
 
         public async Task<(bool ok, string message)> RegisterAsync(RegisterUserDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.Username) || dto.Username.Length < 3)
-                return (false, "Username must be at least 3 characters.");
-
-            if (string.IsNullOrWhiteSpace(dto.Password) || dto.Password.Length < 4)
-                return (false, "Password must be at least 4 characters.");
+            if (string.IsNullOrWhiteSpace(dto.Username) ||
+                string.IsNullOrWhiteSpace(dto.Password) ||
+                string.IsNullOrWhiteSpace(dto.ConfirmPassword))
+            {
+                return (false, "Username and password are required.");
+            }
 
             if (dto.Password != dto.ConfirmPassword)
                 return (false, "Passwords do not match.");
 
-            var exists = await _db.Users.AnyAsync(u => u.Username == dto.Username);
+            var username = dto.Username.Trim();
+
+            var exists = await _db.Users.AnyAsync(u => u.Username == username);
             if (exists)
                 return (false, "Username already exists.");
 
             var user = new User
             {
-                Username = dto.Username.Trim(),
-                Password = dto.Password,
+                Username = username,
+                Password = dto.Password, // НЕ се хешира по условие
                 Role = UserRole.RegisteredUser,
                 Status = UserStatus.Active
             };
@@ -52,35 +53,27 @@ namespace MovieHub.App.Services
             if (string.IsNullOrWhiteSpace(dto.Username) || string.IsNullOrWhiteSpace(dto.Password))
                 return (null, "Username and password are required.");
 
-            var passwordHash = dto.Password;
+            var username = dto.Username.Trim();
 
-            var user = await _db.Users
-                .Where(u => u.Username == dto.Username)
-                .Select(u => new
-                {
-                    u.Id,
-                    u.Username,
-                    u.Password,
-                    u.Role,
-                    u.Status
-                })
-                .FirstOrDefaultAsync();
-
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == username);
             if (user == null)
                 return (null, "Invalid username or password.");
 
-            if (user.Status == UserStatus.Blocked)
-                return (null, "Your account is blocked. Contact administrator.");
-
-            if (user.Password != passwordHash)
+            if (user.Password != dto.Password) // НЕ се хешира по условие
                 return (null, "Invalid username or password.");
 
-            return (new CurrentUser
+            if (user.Status == UserStatus.Blocked)
+                return (null, "Your account is blocked.");
+
+            var currentUser = new CurrentUser
             {
                 Id = user.Id,
                 Username = user.Username,
-                Role = user.Role
-            }, "Login successful.");
+                Role = user.Role,
+                Status = user.Status
+            };
+
+            return (currentUser, "Login successful.");
         }
     }
 }

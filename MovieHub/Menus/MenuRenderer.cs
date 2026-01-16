@@ -34,26 +34,22 @@ namespace MovieHub.App.Menus
                 Console.WriteLine("0. Exit");
                 Console.Write("Choose: ");
 
-                var input = ReadChoice();
+                var input = (Console.ReadLine() ?? "").Trim();
 
                 switch (input)
                 {
                     case "1":
                         await LoginFlowAsync();
                         break;
-
                     case "2":
                         await RegisterFlowAsync();
                         break;
-
                     case "3":
                         _state.CurrentUser = new CurrentUser(); // guest
                         await MainMenuAsync();
                         break;
-
                     case "0":
                         return;
-
                     default:
                         Pause("Invalid choice.");
                         break;
@@ -61,127 +57,15 @@ namespace MovieHub.App.Menus
             }
         }
 
-        // ---------------- MAIN MENUS ----------------
-
-        private async Task MainMenuAsync()
+        private void PrintHeader()
         {
-            while (true)
-            {
-                Console.Clear();
-                PrintHeader();
+            if (_state.CurrentUser.IsGuest)
+                Console.WriteLine("Logged in as: Guest");
+            else
+                Console.WriteLine($"Logged in as: {_state.CurrentUser.Username} ({_state.CurrentUser.Role})");
 
-                if (_state.CurrentUser.IsGuest)
-                {
-                    Console.WriteLine("1. List movies");
-                    Console.WriteLine("2. Search movies");
-                    Console.WriteLine("0. Logout");
-                    Console.Write("Choose: ");
-
-                    var input = ReadChoice();
-
-                    switch (input)
-                    {
-                        case "1":
-                            await MoviesListAsync();
-                            break;
-                        case "2":
-                            await MoviesSearchAsync();
-                            break;
-                        case "0":
-                            LogoutToGuest();
-                            return;
-                        default:
-                            Pause("Invalid choice.");
-                            break;
-                    }
-
-                    continue;
-                }
-
-                if (_state.CurrentUser.Role == UserRole.RegisteredUser)
-                {
-                    Console.WriteLine("1. List movies");
-                    Console.WriteLine("2. Search movies");
-                    Console.WriteLine("3. Add movie");
-                    Console.WriteLine("0. Logout");
-                    Console.Write("Choose: ");
-
-                    var input = ReadChoice();
-
-                    switch (input)
-                    {
-                        case "1":
-                            await MoviesListAsync();
-                            break;
-                        case "2":
-                            await MoviesSearchAsync();
-                            break;
-                        case "3":
-                            await MoviesAddAsync();
-                            break;
-                        case "0":
-                            LogoutToGuest();
-                            return;
-                        default:
-                            Pause("Invalid choice.");
-                            break;
-                    }
-
-                    continue;
-                }
-
-                if (_state.CurrentUser.Role == UserRole.Administrator)
-                {
-                    Console.WriteLine("1. List users");
-                    Console.WriteLine("2. Block user");
-                    Console.WriteLine("3. Unblock user");
-                    Console.WriteLine("4. Delete user");
-                    Console.WriteLine("5. List movies");
-                    Console.WriteLine("6. Add movie");
-                    Console.WriteLine("0. Logout");
-                    Console.Write("Choose: ");
-
-                    var input = ReadChoice();
-
-                    switch (input)
-                    {
-                        case "1":
-                            await AdminListUsersAsync();
-                            break;
-                        case "2":
-                            await AdminBlockUnblockAsync(block: true);
-                            break;
-                        case "3":
-                            await AdminBlockUnblockAsync(block: false);
-                            break;
-                        case "4":
-                            await AdminDeleteUserAsync();
-                            break;
-                        case "5":
-                            await MoviesListAsync();
-                            break;
-                        case "6":
-                            await MoviesAddAsync();
-                            break;
-                        case "0":
-                            LogoutToGuest();
-                            return;
-                        default:
-                            Pause("Invalid choice.");
-                            break;
-                    }
-
-                    continue;
-                }
-
-                // fallback (ако Role е неочакван)
-                LogoutToGuest();
-                Pause("Unknown role. Logged out.");
-                return;
-            }
+            Console.WriteLine(new string('-', 40));
         }
-
-        // ---------------- AUTH FLOWS ----------------
 
         private async Task LoginFlowAsync()
         {
@@ -189,16 +73,12 @@ namespace MovieHub.App.Menus
             PrintHeader();
 
             Console.Write("Username: ");
-            var username = (Console.ReadLine() ?? "").Trim();
+            var username = Console.ReadLine() ?? "";
 
             Console.Write("Password: ");
-            var password = (Console.ReadLine() ?? "").Trim();
+            var password = Console.ReadLine() ?? "";
 
-            var (user, message) = await _auth.LoginAsync(new LoginDto
-            {
-                Username = username,
-                Password = password
-            });
+            var (user, message) = await _auth.LoginAsync(new LoginDto { Username = username, Password = password });
 
             if (user == null)
             {
@@ -218,13 +98,13 @@ namespace MovieHub.App.Menus
             PrintHeader();
 
             Console.Write("Username: ");
-            var username = (Console.ReadLine() ?? "").Trim();
+            var username = Console.ReadLine() ?? "";
 
             Console.Write("Password: ");
-            var password = (Console.ReadLine() ?? "").Trim();
+            var password = Console.ReadLine() ?? "";
 
             Console.Write("Confirm password: ");
-            var confirm = (Console.ReadLine() ?? "").Trim();
+            var confirm = Console.ReadLine() ?? "";
 
             var (ok, message) = await _auth.RegisterAsync(new RegisterUserDto
             {
@@ -234,6 +114,127 @@ namespace MovieHub.App.Menus
             });
 
             Pause(message);
+        }
+
+        private async Task MainMenuAsync()
+        {
+            while (true)
+            {
+                Console.Clear();
+                PrintHeader();
+
+                // -------- GUEST --------
+                if (_state.CurrentUser.IsGuest)
+                {
+                    Console.WriteLine("1. List movies");
+                    Console.WriteLine("2. Search movies");
+                    Console.WriteLine("0. Logout");
+                    Console.Write("Choose: ");
+
+                    var input = (Console.ReadLine() ?? "").Trim();
+
+                    switch (input)
+                    {
+                        case "1":
+                            await MoviesListAsync();
+                            break;
+                        case "2":
+                            await MoviesSearchAsync();
+                            break;
+                        case "0":
+                            _state.CurrentUser = new CurrentUser();
+                            return;
+                        default:
+                            Pause("Invalid choice.");
+                            break;
+                    }
+
+                    continue;
+                }
+
+                // -------- REGISTERED USER --------
+                if (_state.CurrentUser.Role == UserRole.RegisteredUser)
+                {
+                    Console.WriteLine("1. List movies");
+                    Console.WriteLine("2. Search movies");
+                    Console.WriteLine("3. Add movie");
+                    Console.WriteLine("0. Logout");
+                    Console.Write("Choose: ");
+
+                    var input = (Console.ReadLine() ?? "").Trim();
+
+                    switch (input)
+                    {
+                        case "1":
+                            await MoviesListAsync();
+                            break;
+                        case "2":
+                            await MoviesSearchAsync();
+                            break;
+                        case "3":
+                            await MoviesAddAsync();
+                            break;
+                        case "0":
+                            _state.CurrentUser = new CurrentUser();
+                            return;
+                        default:
+                            Pause("Invalid choice.");
+                            break;
+                    }
+
+                    continue;
+                }
+
+                // -------- ADMIN --------
+                if (_state.CurrentUser.Role == UserRole.Administrator)
+                {
+                    Console.WriteLine("1. List users");
+                    Console.WriteLine("2. Block user");
+                    Console.WriteLine("3. Unblock user");
+                    Console.WriteLine("4. Delete user");
+                    Console.WriteLine("5. List movies");
+                    Console.WriteLine("6. Add movie");
+                    Console.WriteLine("0. Logout");
+                    Console.Write("Choose: ");
+
+                    var input = (Console.ReadLine() ?? "").Trim();
+
+                    switch (input)
+                    {
+                        case "1":
+                            await AdminListUsersAsync();
+                            break;
+                        case "2":
+                            await AdminBlockUnblockAsync(true);
+                            break;
+                        case "3":
+                            await AdminBlockUnblockAsync(false);
+                            break;
+                        case "4":
+                            await AdminDeleteUserAsync();
+                            break;
+                        case "5":
+                            await MoviesListAsync();
+                            break;
+                        case "6":
+                            await MoviesAddAsync();
+                            break;
+                        case "0":
+                            _state.CurrentUser = new CurrentUser();
+                            return;
+                        default:
+                            Pause("Invalid choice.");
+                            break;
+                    }
+
+                    continue;
+                }
+
+                // fallback
+                _state.CurrentUser = new CurrentUser();
+                Pause("Unknown role. Logged out.");
+                return;
+            }
         }
 
         // ---------------- ADMIN ----------------
@@ -249,9 +250,7 @@ namespace MovieHub.App.Menus
             Console.WriteLine(new string('-', 60));
 
             foreach (var u in users)
-            {
                 Console.WriteLine($"{u.Id} | {u.Username} | {u.Role} | {u.Status}");
-            }
 
             Pause("End of list.");
         }
@@ -262,9 +261,9 @@ namespace MovieHub.App.Menus
             PrintHeader();
 
             Console.Write("Enter User Id: ");
-            if (!int.TryParse(Console.ReadLine(), out var userId) || userId <= 0)
+            if (!int.TryParse(Console.ReadLine(), out var userId))
             {
-                Pause("Invalid user id.");
+                Pause("Invalid number.");
                 return;
             }
 
@@ -274,7 +273,7 @@ namespace MovieHub.App.Menus
                 NewStatus = block ? UserStatus.Blocked : UserStatus.Active
             };
 
-            var (ok, message) = await _admin.UpdateUserStatusAsync(dto);
+            var (_, message) = await _admin.UpdateUserStatusAsync(dto);
             Pause(message);
         }
 
@@ -284,13 +283,13 @@ namespace MovieHub.App.Menus
             PrintHeader();
 
             Console.Write("Enter User Id to delete: ");
-            if (!int.TryParse(Console.ReadLine(), out var userId) || userId <= 0)
+            if (!int.TryParse(Console.ReadLine(), out var userId))
             {
-                Pause("Invalid user id.");
+                Pause("Invalid number.");
                 return;
             }
 
-            var (ok, message) = await _admin.DeleteUserAsync(new AdminDeleteUserDto { UserId = userId });
+            var (_, message) = await _admin.DeleteUserAsync(new AdminDeleteUserDto { UserId = userId });
             Pause(message);
         }
 
@@ -303,21 +302,11 @@ namespace MovieHub.App.Menus
 
             var movies = await _movies.GetAllMoviesAsync();
 
-            if (movies.Count == 0)
-            {
-                Pause("No movies found.");
-                return;
-            }
-
             Console.WriteLine("ID | Title | ReleaseYear | Genre | Rating | AddedBy");
             Console.WriteLine(new string('-', 90));
 
             foreach (var m in movies)
-            {
-                // rating формат
-                var ratingText = m.Rating.ToString("0.0");
-                Console.WriteLine($"{m.Id} | {m.Title} | {m.ReleaseYear} | {m.Genre} | {ratingText} | {m.AddedBy}");
-            }
+                Console.WriteLine($"{m.Id} | {m.Title} | {m.ReleaseYear} | {m.Genre} | {m.Rating} | {m.AddedBy}");
 
             Pause("End of list.");
         }
@@ -332,20 +321,11 @@ namespace MovieHub.App.Menus
 
             var movies = await _movies.SearchMoviesAsync(text);
 
-            if (movies.Count == 0)
-            {
-                Pause("No matches.");
-                return;
-            }
-
             Console.WriteLine("ID | Title | ReleaseYear | Genre | Rating | AddedBy");
             Console.WriteLine(new string('-', 90));
 
             foreach (var m in movies)
-            {
-                var ratingText = m.Rating.ToString("0.0");
-                Console.WriteLine($"{m.Id} | {m.Title} | {m.ReleaseYear} | {m.Genre} | {ratingText} | {m.AddedBy}");
-            }
+                Console.WriteLine($"{m.Id} | {m.Title} | {m.ReleaseYear} | {m.Genre} | {m.Rating} | {m.AddedBy}");
 
             Pause("End of results.");
         }
@@ -369,75 +349,32 @@ namespace MovieHub.App.Menus
             }
 
             Console.Write("Title: ");
-            var title = (Console.ReadLine() ?? "").Trim();
-            if (string.IsNullOrWhiteSpace(title))
-            {
-                Pause("Title is required.");
-                return;
-            }
+            var title = Console.ReadLine() ?? "";
 
-            Console.Write("ReleaseYear: ");
-            if (!int.TryParse(Console.ReadLine(), out var year) || year < 1888 || year > DateTime.Now.Year + 1)
-            {
-                Pause("Invalid year.");
-                return;
-            }
+            Console.Write("Release year: ");
+            int.TryParse(Console.ReadLine(), out var releaseYear);
 
             Console.Write("Rating (0-10): ");
-            if (!decimal.TryParse(Console.ReadLine(), out var rating) || rating < 0 || rating > 10)
-            {
-                Pause("Invalid rating.");
-                return;
-            }
+            decimal.TryParse(Console.ReadLine(), out var rating);
 
             Console.WriteLine();
             Console.WriteLine("Genres:");
             foreach (var g in genres)
-            {
-                // предполагам, че ти връща tuple (id, name) или обект с Id/Name.
-                // ако е tuple: g.id / g.name
                 Console.WriteLine($"{g.id}. {g.name}");
-            }
 
             Console.Write("Choose Genre Id: ");
-            if (!int.TryParse(Console.ReadLine(), out var genreId) || genreId <= 0)
-            {
-                Pause("Invalid genre id.");
-                return;
-            }
+            int.TryParse(Console.ReadLine(), out var genreId);
 
             var dto = new AddMovieDto
             {
                 Title = title,
-                Year = year,
+                Year = releaseYear,
                 Rating = rating,
                 GenreId = genreId
             };
 
-            var currentUserId = _state.CurrentUser.Id;
-
-            var (ok, message) = await _movies.AddMovieAsync(dto, currentUserId);
+            var (ok, message) = await _movies.AddMovieAsync(dto, _state.CurrentUser.Id);
             Pause(message);
-        }
-
-        // ---------------- HELPERS ----------------
-
-        private void LogoutToGuest()
-        {
-            _state.CurrentUser = new CurrentUser();
-        }
-
-        private static string ReadChoice()
-            => (Console.ReadLine() ?? "").Trim();
-
-        private void PrintHeader()
-        {
-            if (_state.CurrentUser.IsGuest)
-                Console.WriteLine("Logged in as: Guest");
-            else
-                Console.WriteLine($"Logged in as: {_state.CurrentUser.Username} ({_state.CurrentUser.Role})");
-
-            Console.WriteLine(new string('-', 40));
         }
 
         private static void Pause(string message)
