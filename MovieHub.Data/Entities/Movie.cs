@@ -1,29 +1,20 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using MovieHub.Data.Entities;
 
-namespace MovieHub.Data.Entities
+public class Movie
 {
-    public class Movie
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        [Required]
-        [MaxLength(80)]
-        public string Title { get; set; } = null!;
+    public string Title { get; set; } = "";
 
-        [Range(1888, 2100)]
-        public int ReleaseYear { get; set; }
+    public int ReleaseYear { get; set; }
 
-        [Range(0, 10)]
-        [Column(TypeName = "decimal(3,1)")]
-        public decimal Rating { get; set; }
+    public decimal Rating { get; set; }  // ⬅ виж проблем 2
 
-        public int GenreId { get; set; }
-        public Genre Genre { get; set; } = null!;
+    public int GenreId { get; set; }
+    public Genre Genre { get; set; } = null!;
 
-        public int AddedByUserId { get; set; }
-        public User AddedByUser { get; set; } = null!;
+    public int AddedByUserId { get; set; }
+    public User AddedByUser { get; set; } = null!;
 
-        public ICollection<MovieActor> MovieActors { get; set; } = new HashSet<MovieActor>();
-    }
+    public ICollection<MovieActor> MovieActors { get; set; } = new List<MovieActor>();
 }

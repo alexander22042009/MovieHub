@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MovieHub.Data.Entities;
+using MovieHub.Data.Configurations;
+
 
 namespace MovieHub.Data.Data
 {
@@ -20,8 +22,14 @@ namespace MovieHub.Data.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Fluent configurations (ще ги добавим в следващите стъпки)
+            modelBuilder.ApplyConfiguration(new UserConfiguration());
+            modelBuilder.ApplyConfiguration(new GenreConfiguration());
+            modelBuilder.ApplyConfiguration(new MovieConfiguration());
+            modelBuilder.ApplyConfiguration(new ActorConfiguration());
+            modelBuilder.ApplyConfiguration(new MovieActorConfiguration());
+
             base.OnModelCreating(modelBuilder);
         }
+
     }
 }
