@@ -11,8 +11,8 @@ using MovieHub.Data.Data;
 namespace MovieHub.Data.Migrations
 {
     [DbContext(typeof(MovieHubDbContext))]
-    [Migration("20260115215442_SeedGenres")]
-    partial class SeedGenres
+    [Migration("20260116083641_AddActors")]
+    partial class AddActors
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -41,13 +41,13 @@ namespace MovieHub.Data.Migrations
                     b.Property<decimal>("Rating")
                         .HasColumnType("decimal(3,1)");
 
+                    b.Property<int>("ReleaseYear")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(80)
                         .HasColumnType("nvarchar(80)");
-
-                    b.Property<int>("ReleaseYear")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -68,9 +68,6 @@ namespace MovieHub.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BirthYear")
-                        .HasColumnType("int");
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -159,7 +156,7 @@ namespace MovieHub.Data.Migrations
 
                     b.HasIndex("ActorId");
 
-                    b.ToTable("MoviesActors");
+                    b.ToTable("MovieActors");
                 });
 
             modelBuilder.Entity("MovieHub.Data.Entities.User", b =>
@@ -192,7 +189,6 @@ namespace MovieHub.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
-
                 });
 
             modelBuilder.Entity("Movie", b =>

@@ -12,14 +12,17 @@ namespace MovieHub.App.Menus
         private readonly AuthService _auth;
         private readonly AdminService _admin;
         private readonly MovieService _movies;
+        private readonly ActorService _actors;
 
-        public MenuRenderer(AppState state, AuthService auth, AdminService admin, MovieService movies)
+        public MenuRenderer(AppState state, AuthService auth, AdminService admin, MovieService movies, ActorService actors)
         {
             _state = state;
             _auth = auth;
             _admin = admin;
             _movies = movies;
+            _actors = actors;
         }
+
 
         public async Task RunAsync()
         {
@@ -47,6 +50,9 @@ namespace MovieHub.App.Menus
                     case "3":
                         _state.CurrentUser = new CurrentUser(); // guest
                         await MainMenuAsync();
+                        break;
+                    case "4":
+                        await ActorsMenuAsync();
                         break;
                     case "0":
                         return;
@@ -194,6 +200,7 @@ namespace MovieHub.App.Menus
                     Console.WriteLine("4. Delete user");
                     Console.WriteLine("5. List movies");
                     Console.WriteLine("6. Add movie");
+                    Console.WriteLine("7. Actors menu");
                     Console.WriteLine("0. Logout");
                     Console.Write("Choose: ");
 
@@ -218,6 +225,9 @@ namespace MovieHub.App.Menus
                             break;
                         case "6":
                             await MoviesAddAsync();
+                            break;
+                        case "7":
+                            await ActorsMenuAsync();
                             break;
                         case "0":
                             _state.CurrentUser = new CurrentUser();
@@ -384,5 +394,129 @@ namespace MovieHub.App.Menus
             Console.WriteLine("Press Enter...");
             Console.ReadLine();
         }
+
+        private async Task ActorsMenuAsync()
+        {
+            while (true)
+            {
+                Console.Clear();
+                PrintHeader();
+
+                Console.WriteLine("ACTORS MENU");
+                Console.WriteLine("1. List actors");
+                Console.WriteLine("2. Add actor");
+                Console.WriteLine("3. Link actor to movie");
+                Console.WriteLine("4. Show actors for a movie");
+                Console.WriteLine("0. Back");
+                Console.Write("Choose: ");
+
+                var input = (Console.ReadLine() ?? "").Trim();
+
+                switch (input)
+                {
+                    case "1":
+                        await ActorsListAsync();
+                        break;
+                    case "2":
+                        await ActorsAddAsync();
+                        break;
+                    case "3":
+                        await ActorsLinkToMovieAsync();
+                        break;
+                    case "4":
+                        await ActorsShowForMovieAsync();
+                        break;
+                    case "0":
+                        return;
+                    default:
+                        Pause("Invalid choice.");
+                        break;
+                }
+            }
+        }
+
+        private async Task ActorsListAsync()
+        {
+            Console.Clear();
+            PrintHeader();
+
+            var actors = await _actors.GetAllActorsAsync();
+            if (actors.Count == 0)
+            {
+                Pause("No actors found.");
+                return;
+            }
+
+            Console.WriteLine("ID | Full Name");
+            Console.WriteLine(new string('-', 45));
+            foreach (var a in actors)
+                Console.WriteLine($"{a.id} | {a.name}");
+
+            Pause("End of list.");
+        }
+
+        private async Task ActorsAddAsync()
+        {
+            Console.Clear();
+            PrintHeader();
+
+            Console.Write("Actor full name: ");
+            var name = Console.ReadLine() ?? "";
+
+            var (ok, message) = await _actors.AddActorAsync(name);
+            Pause(message);
+        }
+
+        private async Task ActorsLinkToMovieAsync()
+        {
+            Console.Clear();
+            PrintHeader();
+
+            Console.Write("Movie Id: ");
+            if (!int.TryParse(Console.ReadLine(), out var movieId))
+            {
+                Pause("Invalid movie id.");
+                return;
+            }
+
+            Console.Write("Actor Id: ");
+            if (!int.TryParse(Console.ReadLine(), out var actorId))
+            {
+                Pause("Invalid actor id.");
+                return;
+            }
+
+            var (ok, message) = await _actors.AddActorToMovieAsync(movieId, actorId);
+            Pause(message);
+        }
+
+        private async Task ActorsShowForMovieAsync()
+        {
+            Console.Clear();
+            PrintHeader();
+
+            Console.Write("Movie Id: ");
+            if (!int.TryParse(Console.ReadLine(), out var movieId))
+            {
+                Pause("Invalid movie id.");
+                return;
+            }
+
+            var names = await _actors.GetActorsForMovieAsync(movieId);
+
+            if (names.Count == 0)
+            {
+                Pause("No actors linked to this movie.");
+                return;
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Actors:");
+            foreach (var n in names)
+                Console.WriteLine($"- {n}");
+
+            Pause("End.");
+        }
+
     }
 }

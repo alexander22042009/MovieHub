@@ -150,16 +150,6 @@ namespace MovieHub.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Password = "admin123",
-                            Role = 2,
-                            Status = 1,
-                            Username = "admin"
-                        });
                 });
 
             modelBuilder.Entity("MovieHub.Data.Entities.Movie", b =>

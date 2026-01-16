@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
 
 namespace MovieHub.Data.Entities
 {
@@ -6,13 +6,9 @@ namespace MovieHub.Data.Entities
     {
         public int Id { get; set; }
 
-        [Required]
-        [MaxLength(60)]
         public string FullName { get; set; } = null!;
 
-        [Range(1850, 2100)]
-        public int BirthYear { get; set; }
-
-        public ICollection<MovieActor> MovieActors { get; set; } = new HashSet<MovieActor>();
+        // ✅ List вместо HashSet
+        public List<MovieActor> MovieActors { get; set; } = new();
     }
 }

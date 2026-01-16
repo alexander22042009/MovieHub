@@ -38,13 +38,13 @@ namespace MovieHub.Data.Migrations
                     b.Property<decimal>("Rating")
                         .HasColumnType("decimal(3,1)");
 
+                    b.Property<int>("ReleaseYear")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(80)
                         .HasColumnType("nvarchar(80)");
-
-                    b.Property<int>("ReleaseYear")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -65,9 +65,6 @@ namespace MovieHub.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BirthYear")
-                        .HasColumnType("int");
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -156,7 +153,7 @@ namespace MovieHub.Data.Migrations
 
                     b.HasIndex("ActorId");
 
-                    b.ToTable("MoviesActors");
+                    b.ToTable("MovieActors");
                 });
 
             modelBuilder.Entity("MovieHub.Data.Entities.User", b =>
@@ -189,16 +186,6 @@ namespace MovieHub.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Password = "admin123",
-                            Role = 2,
-                            Status = 1,
-                            Username = "admin"
-                        });
                 });
 
             modelBuilder.Entity("Movie", b =>

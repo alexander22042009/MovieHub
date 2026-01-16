@@ -14,7 +14,6 @@ namespace MovieHub.App
     {
         static async Task Main(string[] args)
         {
-            // Configuration
             IConfiguration configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false)
@@ -22,23 +21,20 @@ namespace MovieHub.App
 
             string? connectionString = configuration.GetConnectionString("DefaultConnection");
 
-            // DbContext
             var options = new DbContextOptionsBuilder<MovieHubDbContext>()
                 .UseSqlServer(connectionString)
                 .Options;
 
             using var db = new MovieHubDbContext(options);
 
-            // App state + services
             var state = new AppState();
             var authService = new AuthService(db);
             var adminService = new AdminService(db);
-            var movieService = new MovieService(db); // ✅ NEW
+            var movieService = new MovieService(db);
+            var actorService = new ActorService(db);
 
-            // Menu
-            var menu = new MenuRenderer(state, authService, adminService, movieService); // ✅ NEW
+            var menu = new MenuRenderer(state, authService, adminService, movieService, actorService); 
 
-            // Start app
             await menu.RunAsync();
         }
     }

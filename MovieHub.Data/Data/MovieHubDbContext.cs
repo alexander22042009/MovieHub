@@ -17,8 +17,8 @@ namespace MovieHub.Data.Data
         public DbSet<User> Users => Set<User>();
         public DbSet<Movie> Movies => Set<Movie>();
         public DbSet<Genre> Genres => Set<Genre>();
-        public DbSet<Actor> Actors => Set<Actor>();
-        public DbSet<MovieActor> MoviesActors => Set<MovieActor>();
+        public DbSet<Actor> Actors { get; set; } = null!;
+        public DbSet<MovieActor> MovieActors { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,7 +27,6 @@ namespace MovieHub.Data.Data
             modelBuilder.ApplyConfiguration(new MovieConfiguration());
             modelBuilder.ApplyConfiguration(new ActorConfiguration());
             modelBuilder.ApplyConfiguration(new MovieActorConfiguration());
-
             base.OnModelCreating(modelBuilder);
         }
 

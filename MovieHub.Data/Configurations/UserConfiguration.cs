@@ -34,15 +34,6 @@ namespace MovieHub.Data.Configurations
                 .WithOne(m => m.AddedByUser)
                 .HasForeignKey(m => m.AddedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasData(new User
-            {
-                Id = 1,
-                Username = "admin",
-                Password = "admin123",
-                Role = UserRole.Administrator,
-                Status = UserStatus.Active
-            });
         }
     }
 }
