@@ -13,7 +13,7 @@ namespace MovieHub.Data.Data
             : base(options)
         {
         }
-
+            
         public DbSet<User> Users => Set<User>();
         public DbSet<Movie> Movies => Set<Movie>();
         public DbSet<Genre> Genres => Set<Genre>();
